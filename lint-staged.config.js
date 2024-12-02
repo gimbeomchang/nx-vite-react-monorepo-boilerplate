@@ -1,8 +1,14 @@
+const path = require('path');
+
+const getRelativePath = (files) => files.map((file) => path.relative(process.cwd(), file));
+
 module.exports = {
-  '*.{js,jsx,ts,tsx}': [
-    'eslint --fix',
-    'prettier --write',
-    () => 'nx affected:lint --uncommitted',
+  '*.{ts,tsx}': (files) =>
+    `nx affected --target=typecheck --files=${getRelativePath(files).join(',')} --parallel=10`,
+  '*.{js,jsx,ts,tsx}': (files) => [
+    `nx affected --target=lint --files=${getRelativePath(files).join(',')}`,
+    `nx format:write --files=${getRelativePath(files).join(',')}`,
   ],
-  '*.{json,css,scss,md}': ['prettier --write'],
+  '*.{css,scss}': ['prettier --write', 'stylelint'],
+  '*.{json,md}': ['prettier --write'],
 };
